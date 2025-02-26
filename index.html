@@ -14,6 +14,7 @@
 				display: flex;
 			    align-items: center;
 			    justify-content: center;
+			    background-color: #000; /* Add black background */
 			}
 			body.active {
 				border-left: 3px #f06 solid;
@@ -83,15 +84,41 @@
 		const judge = new Judge(tasksLength, targets, "teamName");
 		// =========== /end required =========== 
 
+		// Function to update square colors based on the current task
+		function updateSquareColors(nextSquareIndex) {
+			// Set all squares to dark gray
+			for (let i = 0; i < numberOfSquaresTall * numberOfSquaresWide; i++) {
+				targets[i].fill("#333"); // Dark gray for incorrect squares
+				targets[i].stroke('none'); // Remove stroke from non-target squares
+			}
 
-		// When the next task is available, fetch it.
-		// A "task" is simply the index of the next square that should be clicked.
+			// Set the next square to white if it exists
+			if (typeof nextSquareIndex !== "undefined") {
+				targets[nextSquareIndex].fill("#fff"); // White for the target square
+				targets[nextSquareIndex].stroke('#fff'); // White outline
+				targets[nextSquareIndex].stroke({ width: 2 });
+			}
+		}
+
+		// Event listener for new tasks
 		judge.on("newTask", () => {
-			let nextTasks = judge.getNextTwoTasks();
-			// getNextTwoTasks() will get you the next two, as an array of length 2.
-			// Note that it's possible that one or both elements will be "undefined" (e.g. if there are no more tasks, or only one more).
-			console.log("The next square you should click is "+nextTasks[0]);
-		})
+			let nextSquareIndex = judge.getNextTwoTasks()[0];
+			updateSquareColors(nextSquareIndex);
+		});
+
+		// Event listener for correct square clicks
+		judge.on("correctSquare", () => {
+			console.log("Correct square clicked!");
+			// Automatically trigger the next task
+			let nextSquareIndex = judge.getNextTwoTasks()[0];
+			updateSquareColors(nextSquareIndex);
+		});
+
+		// Event listener for wrong square clicks
+		judge.on("wrongSquare", () => {
+			console.log("Wrong square clicked!");
+			// Optionally, you can add logic here to handle incorrect clicks
+		});
 
 		// Other available events you can assign handlers to:
 		// 		correctSquare: when the correct square is clicked
@@ -102,24 +129,6 @@
 		// 		start: whenever the start button is pressed
 		// 		stop: whenever the stop button is pressed
 
-		//  =========== !!! FOR EXAMPLE !!! =========== 
-		// Note that this version *overwrites* the "on" handler above at line 89.
-		judge.on("newTask", () => {
-			// get the next task
-			let nextSquareIndex = judge.getNextTwoTasks()[0];
-
-			// reset all the squares to grey
-			for (let i=0; i<numberOfSquaresTall*numberOfSquaresWide; i++) {
-				targets[i].fill("#333")
-			}
-
-			// if there is indeed a next task (not "undefined")
-			if (typeof nextSquareIndex !== "undefined") {
-				console.log("Next: "+nextSquareIndex);
-				// fill it with hot pink
-				targets[nextSquareIndex].fill("#f06");
-			}
-		})
 		
 	</script>
 </html>
